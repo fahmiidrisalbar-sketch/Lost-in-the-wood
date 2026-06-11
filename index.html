@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lost in the Woods - Main Menu Update</title>
+    <title>Lost in the Woods - Return to Menu Update</title>
     <style>
         * {
             box-sizing: border-box;
@@ -143,7 +143,24 @@
             border: 1px solid #333;
         }
 
-        .ui-row { display: flex; justify-content: space-between; }
+        .ui-row { display: flex; justify-content: space-between; align-items: center; }
+
+        /* Gaya Tombol Back to Menu Kecil di Pojok Atas Game */
+        .back-menu-btn {
+            background-color: #222;
+            color: #ff3333;
+            border: 1px solid #ff3333;
+            padding: 3px 6px;
+            font-size: 9px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: monospace;
+        }
+        .back-menu-btn:active {
+            background-color: #ff3333;
+            color: #000;
+        }
 
         #game-container {
             position: relative;
@@ -283,11 +300,14 @@
     <div id="ui-panel">
         <div class="ui-row">
             <div>LOKASI: <span id="map-name" style="color:#00ffff; font-weight:bold;">MAP 1</span></div>
-            <div>TAS: <span id="inv-pickaxe">❌⛏️</span> <span id="inv-key">❌🔑</span> <span id="inv-sword">❌⚔️</span> <span id="inv-axe">❌🪓</span></div>
+            <button class="back-menu-btn" onclick="returnToMainMenu()">🏠 MENU</button>
         </div>
-        <div class="ui-row">
-            <div>MISI: <span id="task-txt" style="color: #ffcc00;">CARI LOGISTIK!</span></div>
-            <div>PART MOBIL: <span id="parts-txt">0/4</span></div>
+        <div class="ui-row" style="margin-top: 3px;">
+            <div>TAS: <span id="inv-pickaxe">❌⛏️</span> <span id="inv-key">❌🔑</span> <span id="inv-sword">❌⚔️</span> <span id="inv-axe">❌🪓</span></div>
+            <div>PART: <span id="parts-txt">0/4</span></div>
+        </div>
+        <div class="ui-row" style="margin-top: 1px; border-top: 1px solid #222; padding-top: 2px;">
+            <div style="font-size: 9px;">MISI: <span id="task-txt" style="color: #ffcc00;">CARI LOGISTIK!</span></div>
         </div>
     </div>
 
@@ -320,7 +340,10 @@
         <div id="scary-face">👹</div>
         <h1 style="color: #ff0000; font-size: 28px; margin-top: 20px; letter-spacing: 3px;">KAMU MATI!</h1>
         <p style="color: #666; font-size: 14px; margin-top: 5px;">Monster hutan menangkapmu...</p>
-        <button class="btn-retry" onclick="resetAndRestart()">COBA LAGI</button>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-retry" onclick="resetAndRestart()">RETRY</button>
+            <button class="btn-retry" style="background-color: #444;" onclick="returnToMainMenu()">MENU</button>
+        </div>
     </div>
 
     <script>
@@ -349,7 +372,7 @@
         let mapHeight = container.clientHeight;
 
         let currentMap = 1; 
-        let isGameStarted = false; // Status penahan pergerakan sebelum tombol play ditekan
+        let isGameStarted = false; 
 
         const mapNames = {
             1: "MAP 1 (Area Mobil 🚗)",
@@ -388,6 +411,24 @@
             resetAndRestart();
         }
 
+        // FUNGSI LOGIKA KEMBALI KE MENU UTAMA SECARA AMAN
+        function returnToMainMenu() {
+            isGameStarted = false;
+            isGameOver = true;
+            moveState = { up: false, down: false, left: false, right: false };
+            
+            if (monsterTimeout) clearTimeout(monsterTimeout);
+            if (toastTimeout) clearTimeout(toastTimeout);
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            
+            monster.active = false;
+            monsterEl.style.display = "none";
+            jumpscareScreen.style.display = "none";
+            toastEl.style.display = "none";
+            
+            mainMenu.style.display = "flex";
+        }
+
         function showToast(text, color = "#00ff00") {
             if(toastTimeout) clearTimeout(toastTimeout);
             toastEl.innerText = text;
@@ -417,7 +458,7 @@
             partsTxt.innerText = "0/4";
             invPickaxe.innerText = "❌⛏️"; invKey.innerText = "❌🔑"; 
             invSword.innerText = "❌⚔️"; invAxe.innerText = "❌🪓";
-            taskTxt.innerText = "MISI: Cari Beliung ⛏️ untuk hancurkan batu rahasia!";
+            taskTxt.innerText = "Cari Beliung ⛏️ untuk hancurkan batu!";
             taskTxt.style.color = "#ffcc00";
             jumpscareScreen.style.display = "none";
             toastEl.style.display = "none";
@@ -651,10 +692,7 @@
                 if (partsCollected === totalPartsNeeded && distToCar < 30) {
                     isGameOver = true;
                     showToast("KAMU MENANG! MOBIL MENYALA DAN KAMU LOLOS!", "#00ff00");
-                    setTimeout(() => { 
-                        isGameStarted = false;
-                        mainMenu.style.display = "flex"; 
-                    }, 3000);
+                    setTimeout(() => { returnToMainMenu(); }, 3000);
                     return;
                 }
             }
@@ -665,10 +703,10 @@
 
         function checkStatusMisi() {
             if (partsCollected === totalPartsNeeded) {
-                taskTxt.innerText = "PART UTUH! SEGERA KEMBALI KE MOBIL DI MAP 1! 🚗";
+                taskTxt.innerText = "PART UTUH! KEMBALI KE MOBIL DI MAP 1! 🚗";
                 taskTxt.style.color = "#00ff00";
             } else {
-                taskTxt.innerText = "Ikuti alur quest untuk membuka area rahasia!";
+                taskTxt.innerText = "Ikuti alur quest rahasia!";
                 taskTxt.style.color = "#ffcc00";
             }
         }
