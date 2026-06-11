@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lost in the Woods - Main Menu Update</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw;
+            touch-action: none;
+        }
+
+        /* TAMPILAN MENU UTAMA (MAIN MENU) */
+        #main-menu {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background-color: #050b05;
+            background-image: radial-gradient(circle, rgba(0,20,0,0.4) 0%, rgba(0,0,0,1) 80%);
+            z-index: 150;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #menu-title {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 32px;
+            color: #ff3333;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255,0,0,0.6);
+            animation: pulse 2s infinite alternate;
+        }
+
+        #menu-subtitle {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 40px;
+            font-style: italic;
+        }
+
+        .menu-btn {
+            width: 80vw;
+            max-width: 280px;
+            padding: 15px;
+            margin: 8px 0;
+            background-color: #111;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            font-family: monospace;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(0,255,0,0.2);
+            transition: all 0.2s;
+        }
+
+        .menu-btn:active {
+            background-color: #00ff00;
+            color: #000;
+            box-shadow: 0 0 15px rgba(0,255,0,0.6);
+        }
+
+        /* PANEL INSTRUKSI */
+        #instruction-panel {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 160;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+        }
+
+        .ins-box {
+            background-color: #111;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 360px;
+            width: 90vw;
+            font-family: monospace;
+            font-size: 11px;
+            line-height: 1.6;
+            color: #ddd;
+        }
+
+        .ins-title {
+            color: #ffcc00;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-align: center;
+            border-bottom: 1px dashed #444;
+            padding-bottom: 5px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.9; }
+            100% { transform: scale(1.04); opacity: 1; }
+        }
+
+        /* UI INTERFACE GAME UTAMA */
+        #ui-panel {
+            width: 90vw;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 10px;
+            color: #00ff00;
+            background-color: #111;
+            border-radius: 6px 6px 0 0;
+            border: 1px solid #333;
+        }
+
+        .ui-row { display: flex; justify-content: space-between; }
+
+        #game-container {
+            position: relative;
+            width: 90vw;
+            height: 48vh;
+            max-width: 400px;
+            background-color: #050b05;
+            border: 3px solid #444;
+            overflow: hidden;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .entity {
+            position: absolute;
+            font-size: 22px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translate(-50%, -50%);
+        }
+
+        #player { z-index: 10; font-size: 24px; }
+        #monster { z-index: 9; font-size: 26px; display: none; }
+        #car { z-index: 5; font-size: 28px; display: none; }
+        #chest { z-index: 6; font-size: 24px; display: none; }
+        #house { z-index: 4; font-size: 32px; display: none; }
+        #rock { z-index: 5; font-size: 26px; display: none; }
+
+        #flashlight {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 8;
+            background: radial-gradient(circle 110px at 50% 50%, transparent 25%, rgba(0, 0, 0, 0.4) 60%, rgba(0,0,0,0.82) 90%);
+        }
+
+        #game-toast {
+            position: absolute;
+            top: 15px; left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(17, 17, 17, 0.9);
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 8px 12px;
+            font-size: 11px;
+            border-radius: 5px;
+            z-index: 20;
+            display: none;
+            text-align: center;
+            width: 80%;
+            font-family: monospace;
+        }
+
+        #dpad {
+            width: 90vw;
+            max-width: 400px;
+            height: 25vh;
+            margin-top: 15px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 8px;
+            touch-action: none;
+        }
+
+        .ctrl-btn {
+            background-color: #222; color: #fff;
+            border: 2px solid #444; border-radius: 10px;
+            font-size: 24px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px #111; cursor: pointer;
+            touch-action: none;
+        }
+
+        .ctrl-btn:active {
+            background-color: #444;
+            transform: translateY(2px);
+            box-shadow: 0 2px #111;
+        }
+
+        .empty { visibility: hidden; }
+
+        #jumpscare-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000; z-index: 100;
+            display: none; flex-direction: column;
+            justify-content: center; align-items: center;
+        }
+
+        #scary-face { font-size: 140px; animation: shake 0.1s infinite; }
+
+        @keyframes shake {
+            0% { transform: translate(3px, 5px) rotate(0deg); }
+            50% { transform: translate(-5px, -3px) rotate(-3deg); }
+            100% { transform: translate(3px, 2px) rotate(3deg); }
+        }
+
+        .btn-retry {
+            margin-top: 20px; padding: 15px 30px;
+            background-color: #ff3333; color: white;
+            border: none; border-radius: 5px;
+            font-size: 18px; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="main-menu">
+        <div id="menu-title">LOST IN THE WOODS</div>
+        <div id="menu-subtitle">Dapatkah kamu keluar hidup-hidup?</div>
+        
+        <button class="menu-btn" onclick="startGameFromMenu()">MULAI BERMAIN</button>
+        <button class="menu-btn" style="border-color: #ffcc00; color: #ffcc00;" onclick="toggleInstructions(true)">INSTRUKSI MISI</button>
+    </div>
+
+    <div id="instruction-panel">
+        <div class="ins-box">
+            <div class="ins-title">📜 PETUNJUK KESELAMATAN</div>
+            <p>Mobilmu rusak di tengah hutan berhantu 🚗. Kumpulkan 4 suku cadang rahasia (⚙️, 🔋, 🛞, ⛽) untuk kabur.</p>
+            <br>
+            <p style="color: #ff3333; font-weight:bold;">ALUR QUEST BERANTAI:</p>
+            <p>1. Cari <b>Beliung ⛏️</b> di Map 3.</p>
+            <p>2. Hancurkan <b>Batu 🪨</b> di Map 3 untuk dapat <b>Kunci 🔑</b>.</p>
+            <p>3. Bawa kunci ke Map 2, buka <b>Peti 🧰</b> untuk mengambil <b>Pedang ⚔️</b>.</p>
+            <p>4. Gunakan Pedang untuk membunuh <b>Monster 👹</b>.</p>
+            <p>5. Cari <b>Kapak 🪓</b> di Map 5, lalu bawa ke Map 4 untuk hancurkan <b>Pintu Rumah 🚪</b> demi mengambil <b>Bensin ⛽</b>.</p>
+            <br>
+            <p style="color: #00ff00; text-align: center;">Gunakan D-Pad di bawah untuk bergerak.</p>
+            <br>
+            <button class="menu-btn" style="width:100%; padding: 10px; font-size:14px; margin:0;" onclick="toggleInstructions(false)">KEMBALI</button>
+        </div>
+    </div>
+
+    <div id="ui-panel">
+        <div class="ui-row">
+            <div>LOKASI: <span id="map-name" style="color:#00ffff; font-weight:bold;">MAP 1</span></div>
+            <div>TAS: <span id="inv-pickaxe">❌⛏️</span> <span id="inv-key">❌🔑</span> <span id="inv-sword">❌⚔️</span> <span id="inv-axe">❌🪓</span></div>
+        </div>
+        <div class="ui-row">
+            <div>MISI: <span id="task-txt" style="color: #ffcc00;">CARI LOGISTIK!</span></div>
+            <div>PART MOBIL: <span id="parts-txt">0/4</span></div>
+        </div>
+    </div>
+
+    <div id="game-container">
+        <div id="game-toast">NOTIFIKASI GAME</div>
+        <div id="flashlight"></div>
+        <div id="player" class="entity">🏃</div>
+        <div id="monster" class="entity">👹</div>
+        <div id="car" class="entity">🚗</div>
+        <div id="chest" class="entity">🧰</div>
+        <div id="house" class="entity">🚪</div>
+        <div id="rock" class="entity">🪨</div>
+    </div>
+
+    <div id="dpad">
+        <div class="empty"></div>
+        <div class="ctrl-btn" id="btn-up">▲</div>
+        <div class="empty"></div>
+        
+        <div class="ctrl-btn" id="btn-left">◀</div>
+        <div class="ctrl-btn" style="background-color: #111; font-size: 12px; border-color: #222; box-shadow: none; cursor: default;">PAD</div>
+        <div class="ctrl-btn" id="btn-right">▶</div>
+        
+        <div class="empty"></div>
+        <div class="ctrl-btn" id="btn-down">▼</div>
+        <div class="empty"></div>
+    </div>
+
+    <div id="jumpscare-screen">
+        <div id="scary-face">👹</div>
+        <h1 style="color: #ff0000; font-size: 28px; margin-top: 20px; letter-spacing: 3px;">KAMU MATI!</h1>
+        <p style="color: #666; font-size: 14px; margin-top: 5px;">Monster hutan menangkapmu...</p>
+        <button class="btn-retry" onclick="resetAndRestart()">COBA LAGI</button>
+    </div>
+
+    <script>
+        const container = document.getElementById('game-container');
+        const playerEl = document.getElementById('player');
+        const monsterEl = document.getElementById('monster');
+        const carEl = document.getElementById('car');
+        const chestEl = document.getElementById('chest');
+        const houseEl = document.getElementById('house');
+        const rockEl = document.getElementById('rock');
+        const flashlight = document.getElementById('flashlight');
+        const taskTxt = document.getElementById('task-txt');
+        const partsTxt = document.getElementById('parts-txt');
+        const mapNameTxt = document.getElementById('map-name');
+        const toastEl = document.getElementById('game-toast');
+        const mainMenu = document.getElementById('main-menu');
+        const instructionPanel = document.getElementById('instruction-panel');
+        
+        const invPickaxe = document.getElementById('inv-pickaxe');
+        const invKey = document.getElementById('inv-key');
+        const invSword = document.getElementById('inv-sword');
+        const invAxe = document.getElementById('inv-axe');
+        const jumpscareScreen = document.getElementById('jumpscare-screen');
+
+        let mapWidth = container.clientWidth;
+        let mapHeight = container.clientHeight;
+
+        let currentMap = 1; 
+        let isGameStarted = false; // Status penahan pergerakan sebelum tombol play ditekan
+
+        const mapNames = {
+            1: "MAP 1 (Area Mobil 🚗)",
+            2: "MAP 2 (Area Peti Pedang 🧰)",
+            3: "MAP 3 (Area Tambang Batu 🪨)",
+            4: "MAP 4 (Area Rumah Bensin 🚪)",
+            5: "MAP 5 (Area Hutan Belantara)"
+        };
+
+        let player = { x: 50, y: 100, speed: 4 };
+        let monster = { x: 0, y: 0, speed: 1.1, active: false, dead: false };
+        
+        let carConfig = { map: 1, x: 70, y: 150 };
+        let chestConfig = { map: 2, x: 200, y: 140, opened: false };
+        let rockConfig = { map: 3, x: 200, y: 130, broken: false };
+        let houseConfig = { map: 4, x: 220, y: 140, smashed: false };
+
+        let hasPickaxe = false, hasKey = false, hasSword = false, hasAxe = false;
+        let partsCollected = 0;
+        let totalPartsNeeded = 4;
+
+        let isGameOver = false;
+        let monsterTimeout = null;
+        let toastTimeout = null;
+        let animationFrameId = null;
+        let moveState = { up: false, down: false, left: false, right: false };
+        let itemsDatabase = [];
+
+        function toggleInstructions(show) {
+            instructionPanel.style.display = show ? "flex" : "none";
+        }
+
+        function startGameFromMenu() {
+            mainMenu.style.display = "none";
+            isGameStarted = true;
+            resetAndRestart();
+        }
+
+        function showToast(text, color = "#00ff00") {
+            if(toastTimeout) clearTimeout(toastTimeout);
+            toastEl.innerText = text;
+            toastEl.style.borderColor = color;
+            toastEl.style.color = color;
+            toastEl.style.display = "block";
+            toastTimeout = setTimeout(() => { toastEl.style.display = "none"; }, 3500);
+        }
+
+        function getSafeRandomCoord(max, minMargin = 60) {
+            return Math.random() * (max - (minMargin * 2)) + minMargin;
+        }
+
+        function initGame() {
+            mapWidth = container.clientWidth;
+            mapHeight = container.clientHeight;
+            isGameOver = false;
+            partsCollected = 0;
+            currentMap = 1;
+
+            hasPickaxe = false; hasKey = false; hasSword = false; hasAxe = false;
+            chestConfig.opened = false; rockConfig.broken = false; houseConfig.smashed = false;
+            monster.dead = false;
+
+            moveState = { up: false, down: false, left: false, right: false };
+            
+            partsTxt.innerText = "0/4";
+            invPickaxe.innerText = "❌⛏️"; invKey.innerText = "❌🔑"; 
+            invSword.innerText = "❌⚔️"; invAxe.innerText = "❌🪓";
+            taskTxt.innerText = "MISI: Cari Beliung ⛏️ untuk hancurkan batu rahasia!";
+            taskTxt.style.color = "#ffcc00";
+            jumpscareScreen.style.display = "none";
+            toastEl.style.display = "none";
+
+            player.x = 150;
+            player.y = mapHeight / 2;
+
+            itemsDatabase = [
+                { type: 'pickaxe', emoji: '⛏️', map: 3, x: getSafeRandomCoord(mapWidth), y: getSafeRandomCoord(mapHeight), collected: false },
+                { type: 'axe', emoji: '🪓', map: 5, x: getSafeRandomCoord(mapWidth), y: getSafeRandomCoord(mapHeight), collected: false },
+                { type: 'part', emoji: '⚙️', map: 1, x: getSafeRandomCoord(mapWidth), y: getSafeRandomCoord(mapHeight), collected: false },
+                { type: 'part', emoji: '🔋', map: 2, x: getSafeRandomCoord(mapWidth), y: getSafeRandomCoord(mapHeight), collected: false },
+                { type: 'part', emoji: '🛞', map: 5, x: getSafeRandomCoord(mapWidth), y: getSafeRandomCoord(mapHeight), collected: false },
+                { type: 'fuel', emoji: '⛽', map: 4, x: 220, y: 140, collected: false }
+            ];
+
+            itemsDatabase.forEach(item => {
+                if(item.map === 1 && Math.hypot(item.x - carConfig.x, item.y - carConfig.y) < 50) {
+                    item.x += 80;
+                }
+            });
+
+            if (monsterTimeout) clearTimeout(monsterTimeout);
+            monster.active = false;
+            monsterEl.style.display = "none";
+            
+            if(isGameStarted) {
+                monsterTimeout = setTimeout(() => {
+                    if(!isGameOver && !monster.dead) {
+                        monster.active = true;
+                        monster.x = mapWidth - 50;
+                        monster.y = mapHeight - 50;
+                        monsterEl.style.display = "flex";
+                    }
+                }, 4000);
+            }
+
+            renderActiveMapElements();
+            updateVisuals();
+        }
+
+        function renderActiveMapElements() {
+            document.querySelectorAll('.part-item').forEach(el => el.remove());
+            mapNameTxt.innerText = mapNames[currentMap];
+
+            carEl.style.display = (currentMap === carConfig.map) ? "flex" : "none";
+            chestEl.style.display = (currentMap === chestConfig.map) ? "flex" : "none";
+            chestEl.innerText = chestConfig.opened ? '🔓' : '🧰';
+            
+            rockEl.style.display = (currentMap === rockConfig.map && !rockConfig.broken) ? "flex" : "none";
+            
+            if (currentMap === houseConfig.map) {
+                houseEl.style.display = "flex";
+                houseEl.innerText = houseConfig.smashed ? '🏚️' : '🚪';
+            } else {
+                houseEl.style.display = "none";
+            }
+
+            itemsDatabase.forEach((item, index) => {
+                if (item.type === 'fuel' && !houseConfig.smashed) return;
+
+                if (!item.collected && item.map === currentMap) {
+                    let div = document.createElement('div');
+                    div.className = 'entity part-item';
+                    div.id = 'item-' + index;
+                    div.innerText = item.emoji;
+                    div.style.left = item.x + 'px';
+                    div.style.top = item.y + 'px';
+                    container.appendChild(div);
+                }
+            });
+        }
+
+        function resetAndRestart() {
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            initGame();
+            processGame();
+        }
+
+        const setupButton = (id, direction) => {
+            const btn = document.getElementById(id);
+            
+            const startMove = (e) => {
+                if (isGameOver || !isGameStarted) return;
+                moveState[direction] = true;
+                if (e.cancelable) e.preventDefault();
+            };
+
+            const stopMove = (e) => {
+                moveState[direction] = false;
+                if (e.cancelable) e.preventDefault();
+            };
+
+            btn.addEventListener('pointerdown', startMove, { passive: false });
+            btn.addEventListener('pointerup', stopMove, { passive: false });
+            btn.addEventListener('pointercancel', stopMove, { passive: false });
+            btn.addEventListener('pointerleave', stopMove, { passive: false });
+        };
+
+        setupButton('btn-up', 'up');
+        setupButton('btn-down', 'down');
+        setupButton('btn-left', 'left');
+        setupButton('btn-right', 'right');
+
+        function processGame() {
+            if (isGameOver || !isGameStarted) return;
+
+            if (moveState.up) player.y -= player.speed;
+            if (moveState.down) player.y += player.speed;
+            if (moveState.left) player.x -= player.speed;
+            if (moveState.right) player.x += player.speed;
+
+            if (player.y < 15) player.y = 15;
+            if (player.y > mapHeight - 15) player.y = mapHeight - 15;
+
+            let mapChanged = false;
+            if (player.x > mapWidth - 5) {
+                if (currentMap < 5) { currentMap++; player.x = 25; mapChanged = true; } 
+                else { player.x = mapWidth - 5; }
+            }
+            if (player.x < 5) {
+                if (currentMap > 1) { currentMap--; player.x = mapWidth - 25; mapChanged = true; } 
+                else { player.x = 5; }
+            }
+
+            if (mapChanged) {
+                renderActiveMapElements();
+                if (monster.active && !monster.dead) {
+                    monster.x = (player.x > mapWidth/2) ? 40 : mapWidth - 40;
+                    monster.y = (player.y > mapHeight/2) ? 40 : mapHeight - 40;
+                }
+            }
+
+            if (monster.active && !monster.dead) {
+                let dx = player.x - monster.x;
+                let dy = player.y - monster.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance > 5) {
+                    monster.x += (dx / distance) * monster.speed;
+                    monster.y += (dy / distance) * monster.speed;
+                }
+
+                if (distance < 24) {
+                    if (hasSword) {
+                        monster.dead = true;
+                        monster.active = false;
+                        monsterEl.style.display = "none";
+                        showToast("KAU BERHASIL MEMBUNUH MONSTER DENGAN PEDANG! ⚔️👹", "#00ff00");
+                    } else {
+                        isGameOver = true;
+                        jumpscareScreen.style.display = "flex";
+                        return;
+                    }
+                }
+            }
+
+            itemsDatabase.forEach((item, index) => {
+                if (item.type === 'fuel' && !houseConfig.smashed) return;
+
+                if (!item.collected && item.map === currentMap) {
+                    let dist = Math.hypot(player.x - item.x, player.y - item.y);
+                    if (dist < 25) {
+                        item.collected = true;
+                        let el = document.getElementById('item-' + index);
+                        if (el) el.remove();
+
+                        if (item.type === 'pickaxe') {
+                            hasPickaxe = true; invPickaxe.innerText = "✅⛏️";
+                            showToast("Mendapatkan Beliung ⛏️. Hancurkan batu rahasia di Map 3!", "#00ffff");
+                        } else if (item.type === 'axe') {
+                            hasAxe = true; invAxe.innerText = "✅🪓";
+                            showToast("Mendapatkan Kapak 🪓. Jebol rumah kayu di Map 4!", "#00ffff");
+                        } else {
+                            partsCollected++;
+                            partsTxt.innerText = `${partsCollected}/${totalPartsNeeded}`;
+                            showToast(`Mendapatkan Part Mobil: ${item.emoji}`, "#ffcc00");
+                        }
+                        checkStatusMisi();
+                    }
+                }
+            });
+
+            if (currentMap === rockConfig.map && !rockConfig.broken) {
+                let distToRock = Math.hypot(player.x - rockConfig.x, player.y - rockConfig.y);
+                if (distToRock < 28) {
+                    if (hasPickaxe) {
+                        rockConfig.broken = true;
+                        rockEl.style.display = "none";
+                        hasKey = true; invKey.innerText = "✅🔑";
+                        showToast("Batu Hancur! Kamu menemukan KUNCI RAHASIA! 🔑", "#00ff00");
+                    } else {
+                        player.x -= 6;
+                        showToast("Batu ini keras! Butuh Beliung ⛏️", "#ff3333");
+                    }
+                }
+            }
+
+            if (currentMap === chestConfig.map && !chestConfig.opened) {
+                let distToChest = Math.hypot(player.x - chestConfig.x, player.y - chestConfig.y);
+                if (distToChest < 28) {
+                    if (hasKey) {
+                        chestConfig.opened = true;
+                        chestEl.innerText = '🔓';
+                        hasSword = true; invSword.innerText = "✅⚔️";
+                        showToast("Peti Terbuka! Kamu mengambil PEDANG PERAK ⚔️!", "#00ff00");
+                    } else {
+                        player.x += 6;
+                        showToast("Peti Terkunci! Butuh Kunci 🔑 dari Batu Map 3", "#ff3333");
+                    }
+                }
+            }
+
+            if (currentMap === houseConfig.map && !houseConfig.smashed) {
+                let distToHouse = Math.hypot(player.x - houseConfig.x, player.y - houseConfig.y);
+                if (distToHouse < 30) {
+                    if (hasAxe) {
+                        houseConfig.smashed = true;
+                        houseEl.innerText = '🏚️';
+                        showToast("Pintu Hancur! Segera ambil Bensin ⛽!", "#00ff00");
+                        renderActiveMapElements();
+                    } else {
+                        player.y += 6;
+                        showToast("Butuh Kapak 🪓 dari Map 5 untuk mendobrak!", "#ff3333");
+                    }
+                }
+            }
+
+            if (currentMap === carConfig.map) {
+                let distToCar = Math.hypot(player.x - carConfig.x, player.y - carConfig.y);
+                if (partsCollected === totalPartsNeeded && distToCar < 30) {
+                    isGameOver = true;
+                    showToast("KAMU MENANG! MOBIL MENYALA DAN KAMU LOLOS!", "#00ff00");
+                    setTimeout(() => { 
+                        isGameStarted = false;
+                        mainMenu.style.display = "flex"; 
+                    }, 3000);
+                    return;
+                }
+            }
+
+            updateVisuals();
+            animationFrameId = requestAnimationFrame(processGame);
+        }
+
+        function checkStatusMisi() {
+            if (partsCollected === totalPartsNeeded) {
+                taskTxt.innerText = "PART UTUH! SEGERA KEMBALI KE MOBIL DI MAP 1! 🚗";
+                taskTxt.style.color = "#00ff00";
+            } else {
+                taskTxt.innerText = "Ikuti alur quest untuk membuka area rahasia!";
+                taskTxt.style.color = "#ffcc00";
+            }
+        }
+
+        function updateVisuals() {
+            playerEl.style.left = player.x + 'px'; playerEl.style.top = player.y + 'px';
+
+            if (currentMap === carConfig.map) { carEl.style.left = carConfig.x + 'px'; carEl.style.top = carConfig.y + 'px'; }
+            if (currentMap === chestConfig.map) { chestEl.style.left = chestConfig.x + 'px'; chestEl.style.top = chestConfig.y + 'px'; }
+            if (currentMap === rockConfig.map && !rockConfig.broken) { rockEl.style.left = rockConfig.x + 'px'; rockEl.style.top = rockConfig.y + 'px'; }
+            if (currentMap === houseConfig.map) { houseEl.style.left = houseConfig.x + 'px'; houseEl.style.top = houseConfig.y + 'px'; }
+            
+            if (monster.active && !monster.dead) {
+                monsterEl.style.left = monster.x + 'px'; monsterEl.style.top = monster.y + 'px';
+            }
+
+            flashlight.style.background = `radial-gradient(circle 110px at ${player.x}px ${player.y}px, transparent 25%, rgba(0, 0, 0, 0.4) 60%, rgba(0,0,0,0.82) 90%)`;
+        }
+
+        window.onload = () => {
+            initGame();
+        };
+    </script>
+</body>
+</html>
